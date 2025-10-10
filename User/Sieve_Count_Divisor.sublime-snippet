@@ -1,0 +1,15 @@
+<snippet>
+	<content><![CDATA[
+vector <int> cnt_div(N, 0);
+cnt_div[1] = 1;
+for (int i = 2; i < N; i++) cnt_div[i] = 2;
+for (int i = 2; i*i < N; i++){
+    cnt_div[i*i]--;
+    for (int j = i; i*j < N; j++) cnt_div[i*j] += 2;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>Sieve_Count_Divisor</tabTrigger> 
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

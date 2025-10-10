@@ -1,0 +1,21 @@
+<snippet>
+	<content><![CDATA[
+vector <int> res;
+
+void Try(int start, int n, int k){
+    if (res.size() == k){
+        for (auto &x: res) cout << x << " ";
+        cout << "\n";
+    }
+    for (int i = start; i <= n; i++){
+        res.push_back(i);
+        Try(i + 1, n, k);
+        res.pop_back();
+    }
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>QuayLuiSinhToHop</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>
