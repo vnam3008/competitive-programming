@@ -1,0 +1,32 @@
+<snippet>
+	<content><![CDATA[
+/*
+    author: Tran Van Nam
+    Da Nang University of Science and Technology - Viet Nam
+*/
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 2e5 + 5;
+const int MOD = 1e9 + 7;
+const int INF = 1e9 + 5;
+
+void solve(int test_case){
+	$0
+}
+
+signed main(){
+    ios_base::sync_with_stdio(0);
+    cin.tie(0); cout.tie(0);
+
+    int Test; cin >> Test; cin.ignore();
+    for (int TestCase = 1; TestCase <= Test; TestCase++) solve(TestCase);
+    
+    return 0^0;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	 <tabTrigger>cf</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>
