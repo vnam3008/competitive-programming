@@ -132,8 +132,6 @@ long long Area(const vector<Point> &P) {
     return abs(ans) / 2.0;
 }
 
-
-
 // Tìm bao lồi (Cross > 0 thì lấy cả những tọa độ trên biên còn không Cross >= 0 thì không lấy)
 vector <Point> ConvexHull(vector <Point> &P){
     int n = (int)P.size();
@@ -166,3 +164,4 @@ vector <Point> ConvexHull(vector <Point> &P){
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<!-- <scope>source.python</scope> -->
 </snippet>
+
