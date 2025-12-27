@@ -13,11 +13,6 @@ long long rand(long long l, long long r) {
     return uniform_int_distribution<long long>(l, r)(rd);
 }
 
-long long randAm(long long l, long long r) { 
-    int ok = rand(0, 1); // Bằng 1 in ra số dương ngược lại bằng 0 in ra số âm
-    if (ok) return rand(l, r); else return -rand(l, r);
-}
-
 signed main(){
     ios_base::sync_with_stdio(0);
     cin.tie(0); cout.tie(0);
@@ -70,3 +65,4 @@ signed main(){
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<!-- <scope>source.python</scope> -->
 </snippet>
+
