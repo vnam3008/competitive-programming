@@ -1,0 +1,11 @@
+[
+    { 
+        "keys": ["ctrl+alt+a"], 
+        "command": "insert_cpp_template" 
+    },
+
+    { 
+        "keys": ["ctrl+alt+s"], 
+        "command": "insert_codeforces_template" 
+    }
+]

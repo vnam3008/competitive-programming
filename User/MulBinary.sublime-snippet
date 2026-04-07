@@ -1,0 +1,17 @@
+<snippet>
+	<content><![CDATA[
+long long Mul(long long a, long long b){
+    long long ans = 0;
+    while (b){
+        if (b & 1) ans = (ans + a) % MOD;
+        a = (a + a) % MOD;
+        b >>= 1;
+    }
+    return ans;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>MulBinary</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

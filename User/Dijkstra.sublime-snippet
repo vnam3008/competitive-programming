@@ -1,0 +1,41 @@
+<snippet>
+	<content><![CDATA[
+struct E{
+    int node;
+    long long value;
+};
+
+struct Compare{
+    bool operator () (E x, E y){
+        return x.value > y.value;
+    }
+};
+
+void Dijkstra(int s, vector <long long> &d, vector <vector<E>> &ke){
+    priority_queue <E, vector<E>, Compare> pq;
+    d[s] = 0;
+    pq.push({s, 0});
+
+    while (pq.size()){
+        int u = pq.top().node;
+        int du = pq.top().value;
+        pq.pop();
+
+        if (du != d[u]) continue;
+
+        for (auto &x: ke[u]){
+            int v = x.node;
+            int w = x.value;
+            if (d[v] > d[u] + w){
+                d[v] = d[u] + w;
+                pq.push({v, d[v]});
+            }
+        }
+    }
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>Dijkstra</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>
