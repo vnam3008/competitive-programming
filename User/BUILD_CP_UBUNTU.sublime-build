@@ -1,0 +1,16 @@
+{
+    "shell_cmd": "wsl g++ -std=c++17 -O2 -Wall -Wextra -Wshadow -DLOCAL \"${file_name}\" -o \"${file_base_name}\" && wsl bash -c \"/usr/bin/time -f '\\n--- THỐNG KÊ ---\\n⏱ Thời gian: %e giây\\n💾 Bộ nhớ: %M KB\\n-----------------' timeout 1s ./${file_base_name} < TEST.INP > TEST.OUT && echo '[✅ PASSED] Chạy thành công!' || echo '[❌ LỖI] Quá 1 giây (TLE) hoặc Lỗi chạy (RTE)'\"",
+    "working_dir": "${file_path}",
+    "selector": "source.c++",
+    "encoding": "utf-8",
+    "variants": [
+        {
+            "name": "👁️ Mắt Thần V2: Bắt lỗi STL",
+            "shell_cmd": "wsl g++ -std=c++17 -Wall -Wextra -Wshadow -Wconversion -Wfloat-equal -DLOCAL -D_GLIBCXX_DEBUG -fsanitize=address -fsanitize=undefined -g \"${file_name}\" -o \"${file_base_name}\" && wsl bash -c \"timeout 2s ./${file_base_name} < TEST.INP > TEST.OUT && echo '[✅ SẠCH SẼ!]' || echo '[❌ PHÁT HIỆN LỖI (Xem TEST.OUT)]'\""
+        },
+        {
+            "name": "✨ Làm đẹp Code",
+            "shell_cmd": "wsl clang-format -i -style=\"{BasedOnStyle: LLVM, IndentWidth: 4, UseTab: Never, BreakBeforeBraces: Attach, AllowShortIfStatementsOnASingleLine: false, AlignConsecutiveDeclarations: false, AlignConsecutiveAssignments: false, ColumnLimit: 120}\" \"${file_name}\""
+        }
+    ]
+}
