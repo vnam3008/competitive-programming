@@ -1,0 +1,256 @@
+<snippet>
+	<content><![CDATA[
+// Sum = (1^k + 2^k + 3^k + ... + n^k) % MOD
+namespace PowerSum{
+    using ll = long long;
+    using i128 = __int128_t;
+
+    // =========================================================================
+    // PHẦN 1: CÁC HÀM BỔ TRỢ SỐ HỌC (HỖN HỢP 128-BIT CHỐNG TRÀN SỐ)
+    // =========================================================================
+
+    // Tìm ước chung lớn nhất trên kiểu 128-bit (dùng để khử mẫu số khi k <= 4)
+    inline i128 gcd128(i128 a, i128 b){
+        while(b){
+            a %= b;
+            swap(a, b);
+        }
+        return a;
+    }
+
+    // Lũy thừa nhị phân (a^b) % mod, hỗ trợ mod = 0 (không lấy dư)
+    inline ll modpow(ll b, ll e, ll mod){
+        i128 ans = 1, base = (mod > 0) ? (b % mod) : b;
+        for(; e > 0; e >>= 1){
+            if(e & 1){
+                ans *= base;
+                if(mod > 0) ans %= mod;
+            }
+            base *= base;
+            if(mod > 0) base %= mod;
+        }
+        return (ll)ans;
+    }
+
+    // Kiểm tra số nguyên tố Miller-Rabin tất định trong O(log^3(MOD))
+    // Dùng để quyết định xem có được phép dùng nghịch đảo modulo trong Lagrange không
+    inline bool isPrime(ll n){
+        if(n < 2) return false;
+        if(n == 2 || n == 3) return true;
+        if(n % 2 == 0) return false;
+        ll d = n - 1;
+        int s = 0;
+        while((d & 1) == 0){
+            d >>= 1;
+            s++;
+        }
+        static const ll bases[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022};
+        for(ll a : bases){
+            if(a % n == 0) continue;
+            ll x = modpow(a, d, n);
+            if(x == 1 || x == n - 1) continue;
+            bool composite = true;
+            for(int r = 1; r < s; r++){
+                x = (i128)x * x % n;
+                if(x == n - 1){
+                    composite = false;
+                    break;
+                }
+            }
+            if(composite) return false;
+        }
+        return true;
+    }
+
+    // Hàm nhân các thừa số trong vector và chia hết cho mẫu số 'den' TRƯỚC khi lấy % mod.
+    // Đảm bảo chính xác 100% với mọi loại MOD (kể cả hợp số hoặc không dùng MOD).
+    inline ll mulDivMod(vector<i128> terms, i128 den, ll mod){
+        for(i128 &x : terms){
+            i128 g = gcd128(x < 0 ? -x : x, den);
+            x /= g;
+            den /= g;
+        }
+        i128 ans = 1;
+        for(i128 x : terms){
+            if(mod > 0) x %= mod;
+            ans *= x;
+            if(mod > 0) ans %= mod;
+        }
+        if(mod > 0 && ans < 0) ans += mod;
+        return (ll)ans;
+    }
+
+    // Sàng tuyến tính (Euler Sieve) tính mảng P[i] = i^k % mod cho i = 0..m
+    // Chỉ gọi hàm modpow đúng pi(m) lần (tai các số nguyên tố) -> Độ phức tạp chuẩn O(m)
+    inline vector<ll> sievePowers(int m, ll k, ll mod){
+        vector<ll> pw(m + 1, 0);
+        vector<int> primes;
+        vector<bool> is_comp(m + 1, false);
+        pw[1] = (mod == 1) ? 0 : 1;
+
+        for(int i = 2; i <= m; i++){
+            if(!is_comp[i]){
+                primes.push_back(i);
+                pw[i] = modpow(i, k, mod);
+            }
+            for(int p : primes){
+                if(i * p > m) break;
+                is_comp[i * p] = true;
+                i128 val = (i128)pw[i] * pw[p];
+                pw[i * p] = (mod > 0) ? (ll)(val % mod) : (ll)val;
+                if(i % p == 0) break;
+            }
+        }
+        return pw;
+    }
+
+    // =========================================================================
+    // PHẦN 2: 3 THUẬT TOÁN CHUYÊN BIỆT CHO TỪNG TRƯỜNG HỢP
+    // =========================================================================
+
+    // [NHÁNH 1]: Công thức đóng O(1) cho k <= 4 (Hoạt động với MỌI MOD)
+    inline ll solveSmallK(ll n, ll k, ll mod){
+        i128 N = n;
+        if(k == 0) return (mod > 0) ? (n % mod) : n;
+        if(k == 1) return mulDivMod({N, N + 1}, 2, mod);
+        if(k == 2) return mulDivMod({N, N + 1, 2 * N + 1}, 6, mod);
+        if(k == 3){
+            ll s1 = mulDivMod({N, N + 1}, 2, mod);
+            i128 ans = (i128)s1 * s1;
+            return (mod > 0) ? (ll)(ans % mod) : (ll)ans;
+        }
+        // k == 4: n(n+1)(2n+1)(3n^2 + 3n - 1) / 30
+        // Để tránh 3n^2 vượt quá giới hạn khi n = 10^18, ta lấy n % (30 * mod) nếu có mod
+        if(mod > 0){
+            i128 period = (i128)30 * mod;
+            N %= period;
+        }
+        return mulDivMod({N, N + 1, 2 * N + 1, 3 * N * N + 3 * N - 1}, 30, mod);
+    }
+
+    // [NHÁNH 2]: Nội suy Lagrange O(k) kết hợp Sàng tuyến tính
+    // Điều kiện: MOD là số nguyên tố và MOD > k + 1
+    inline ll solveLagrange(ll n, int k, ll mod){
+        int D = k + 1; // Đa thức tổng bậc k + 1 cần D + 1 điểm (0..D)
+        vector<ll> pw = sievePowers(D, k, mod);
+
+        vector<ll> y(D + 1, 0);
+        for(int i = 1; i <= D; i++){
+            y[i] = y[i - 1] + pw[i];
+            if(y[i] >= mod) y[i] -= mod;
+        }
+        if(n <= D) return y[n];
+
+        // Chuẩn bị giai thừa nghịch đảo O(k)
+        vector<ll> fact(D + 1, 1), invFact(D + 1, 1);
+        for(int i = 1; i <= D; i++) fact[i] = (i128)fact[i - 1] * i % mod;
+        invFact[D] = modpow(fact[D], mod - 2, mod);
+        for(int i = D - 1; i >= 0; i--) invFact[i] = (i128)invFact[i + 1] * (i + 1) % mod;
+
+        // Tích tiền tố và hậu tố của (n - i)
+        vector<ll> pref(D + 1, 1), suff(D + 1, 1);
+        ll n_mod = n % mod;
+        for(int i = 0; i <= D; i++){
+            ll term = (n_mod - i + mod) % mod;
+            pref[i] = (i == 0) ? term : (ll)((i128)pref[i - 1] * term % mod);
+        }
+        for(int i = D; i >= 0; i--){
+            ll term = (n_mod - i + mod) % mod;
+            suff[i] = (i == D) ? term : (ll)((i128)suff[i + 1] * term % mod);
+        }
+
+        // Tính tổng nội suy Lagrange
+        ll ans = 0;
+        for(int i = 0; i <= D; i++){
+            ll num = 1;
+            if(i > 0) num = (i128)num * pref[i - 1] % mod;
+            if(i < D) num = (i128)num * suff[i + 1] % mod;
+
+            ll den = (i128)invFact[i] * invFact[D - i] % mod;
+            ll term = (i128)y[i] * num % mod * den % mod;
+
+            if((D - i) & 1) ans = (ans - term + mod) % mod;
+            else ans = (ans + term) % mod;
+        }
+        return ans;
+    }
+
+    // [NHÁNH 3]: Quy hoạch động Số Stirling loại 2 O(k^2)
+    // Dùng khi MOD là HỢP SỐ, hoặc MOD <= k + 1, hoặc KHÔNG DÙNG MOD (mod = 0).
+    // Hoàn toàn không dùng phép chia nghịch đảo!
+    inline ll solveStirling(ll n, int k, ll mod){
+        // Tính dòng thứ k của Số Stirling loại 2: S(k, j) bằng mảng 1 chiều
+        vector<ll> S(k + 1, 0);
+        S[0] = 1;
+        for(int i = 1; i <= k; i++){
+            for(int j = i; j >= 1; j--){
+                i128 val = (i128)S[j - 1] + (i128)j * S[j];
+                S[j] = (mod > 0) ? (ll)(val % mod) : (ll)val;
+            }
+            S[0] = 0;
+        }
+
+        // S_k(n) = sum_{j=1..k} S(k, j) * [(n+1)*n*(n-1)*...*(n-j+1) / (j+1)]
+        ll ans = 0;
+        int limit = (n < k) ? (int)n : k;
+        for(int j = 1; j <= limit; j++){
+            if(S[j] == 0) continue;
+            ll div = j + 1;
+            // Trong j + 1 số liên tiếp từ (n + 1) lùi về (n - j + 1),
+            // chắc chắn có đúng 1 số tại vị trí r = (n + 1) % (j + 1) chia hết cho (j + 1)!
+            ll rem = (n + 1) % div;
+            ll prod = 1;
+
+            for(int i = 0; i <= j; i++){
+                ll factor = (i == rem) ? ((n + 1 - i) / div) : (n + 1 - i);
+                if(mod > 0) factor %= mod;
+                i128 tmp = (i128)prod * factor;
+                prod = (mod > 0) ? (ll)(tmp % mod) : (ll)tmp;
+            }
+
+            i128 term = (i128)S[j] * prod;
+            if(mod > 0) ans = (ans + term) % mod;
+            else ans += (ll)term;
+        }
+        return ans;
+    }
+
+    // =========================================================================
+    // PHẦN 3: HÀM ĐIỀU PHỐI TRUNG TÂM (SMART DISPATCHER)
+    // =========================================================================
+    // - Truyền mod = 1000000007 (mặc định) hoặc số bất kỳ.
+    // - Truyền mod = 0 nếu muốn tính giá trị nguyên thực sự (không chia lấy dư).
+    inline ll solve(ll n, ll k, ll mod = 1000000007){
+        if(n <= 0 || mod == 1) return 0;
+
+        // 1. Nếu k <= 4: Luôn dùng công thức đóng O(1) vì nhanh tuyệt đối và đúng với mọi MOD
+        if(k <= 4) return solveSmallK(n, k, mod);
+
+        // 2. Nếu n rất nhỏ (n <= k + 2 và n <= 10^6): Tính trực tiếp bằng Sàng tuyến tính O(n)
+        if(n <= k + 2 && n <= 1000000){
+            vector<ll> pw = sievePowers((int)n, k, mod);
+            ll sum = 0;
+            for(int i = 1; i <= n; i++){
+                sum += pw[i];
+                if(mod > 0 && sum >= mod) sum -= mod;
+            }
+            return sum;
+        }
+
+        // 3. Nếu MOD là số nguyên tố và MOD > k + 1: Dùng Nội suy Lagrange O(k)
+        if(mod > k + 1 && isPrime(mod)){
+            return solveLagrange(n, (int)k, mod);
+        }
+
+        // 4. Trường hợp còn lại (MOD là hợp số, MOD <= k + 1, hoặc mod = 0):
+        // Dùng Số Stirling loại 2 O(k^2) khử mẫu trực tiếp
+        return solveStirling(n, (int)k, mod);
+    }
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>PowerSum</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.cpp</scope> -->
+	<description>Sum = (1^k + 2^k + 3^k + ... + n^k) % MOD</description>
+</snippet>

@@ -1,0 +1,12 @@
+<snippet>
+	<content><![CDATA[
+#define IO(fileName) if (fopen(fileName".INP", "r")){ \
+        freopen(fileName".INP", "r", stdin); \
+        freopen(fileName".OUT", "w", stdout); \
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	 <tabTrigger>IO</tabTrigger> 
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<!-- <scope>source.python</scope> -->
+</snippet>

@@ -1,0 +1,23 @@
+{
+    "shell_cmd": "g++ -std=c++17 -O2 -Wall -Wextra -Wshadow -DLOCAL \"${file}\" -o \"${file_base_name}.exe\" && \"${packages}/User/cprun.exe\" \"${file_path}/${file_base_name}.exe\" \"TEST.INP\" \"TEST.OUT\" \"TEST.ANS\"",
+    "working_dir": "$file_path",
+    "selector": "source.c++",
+    "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+    "quiet": true,
+
+    "variants":
+    [
+        {
+            "name": "Chạy trực tiếp (Nhập tay / Interactive)",
+            "shell_cmd": "g++ -std=c++17 -O2 -Wall -Wextra -Wshadow -DLOCAL \"${file}\" -o \"${file_base_name}.exe\" && start \"CP Interactive - ${file_base_name}\" cmd /c \"\"${packages}/User/cprun.exe\" \"${file_path}/${file_base_name}.exe\" & echo. & pause\""
+        },
+        {
+            "name": "Chỉ biên dịch (Không chạy)",
+            "shell_cmd": "g++ -std=c++17 -O2 -Wall -Wextra -Wshadow -DLOCAL \"${file}\" -o \"${file_base_name}.exe\" && echo [OK] Compiled successfully!"
+        },
+        {
+            "name": "Debug Sanitizer (Bắt lỗi tràn mảng / UB)",
+            "shell_cmd": "g++ -std=c++17 -fsanitize=address,undefined -g -DLOCAL \"${file}\" -o \"${file_base_name}.exe\" && \"${packages}/User/cprun.exe\" \"${file_path}/${file_base_name}.exe\" \"TEST.INP\" \"TEST.OUT\" \"TEST.ANS\""
+        }
+    ]
+}
